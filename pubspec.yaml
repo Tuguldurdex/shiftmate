@@ -1,0 +1,42 @@
+name: shift_mate
+description: "ShiftMate - Employee Shift Scheduling & Management App"
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.11.4
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+  
+  # State Management
+  flutter_riverpod: ^2.6.1
+  riverpod_annotation: ^2.6.1
+  
+  # Navigation
+  go_router: ^14.8.1
+  
+  # Backend - Supabase
+  supabase_flutter: ^2.8.0
+  
+  # UI Components
+  google_fonts: ^6.2.1
+  intl: ^0.20.2
+  
+  # Local Storage
+  shared_preferences: ^2.5.3
+  
+  # Utils
+  uuid: ^4.5.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+  riverpod_generator: ^2.6.5
+  build_runner: ^2.4.15
+
+flutter:
+  uses-material-design: true
