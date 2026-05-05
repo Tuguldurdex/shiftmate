@@ -1,35 +1,19 @@
 import 'package:shared_preferences/shared_preferences.dart';
-import '../core/constants/app_constants.dart';
-import '../features/auth/domain/user_model.dart';
 
 class StorageService {
-  static final StorageService _instance = StorageService._internal();
-  factory StorageService() => _instance;
-  StorageService._internal();
+  static const String _ollamaBaseUrlKey = 'ollama_server_url';
 
-  late SharedPreferences _prefs;
+  static late SharedPreferences _prefs;
 
-  Future<void> init() async {
+  static Future<void> init() async {
     _prefs = await SharedPreferences.getInstance();
   }
 
-  Future<void> saveUser(UserModel user) async {
-    await _prefs.setString(AppConstants.userKey, user.id);
+  static Future<void> saveOllamaBaseUrl(String url) async {
+    await _prefs.setString(_ollamaBaseUrlKey, url);
   }
 
-  String? getUserId() {
-    return _prefs.getString(AppConstants.userKey);
-  }
-
-  Future<void> saveToken(String token) async {
-    await _prefs.setString(AppConstants.tokenKey, token);
-  }
-
-  String? getToken() {
-    return _prefs.getString(AppConstants.tokenKey);
-  }
-
-  Future<void> clearAll() async {
-    await _prefs.clear();
+  static String? getOllamaBaseUrl() {
+    return _prefs.getString(_ollamaBaseUrlKey);
   }
 }

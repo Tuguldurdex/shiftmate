@@ -2,26 +2,43 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class AppTheme {
-  static const Color primaryColor = Color(0xFF6366F1);
-  static const Color secondaryColor = Color(0xFF8B5CF6);
-  static const Color accentColor = Color(0xFF10B981);
-  static const Color errorColor = Color(0xFFEF4444);
-  static const Color warningColor = Color(0xFFF59E0B);
+  // New Design System Colors
+  static const Color primaryColor = Color(0xFF534AB7); // Purple
+  static const Color primaryLight = Color(0xFF7F77DD);
+  static const Color secondaryColor = primaryLight; // Alias for backward compatibility
+  static const Color backgroundColor = Color(0xFFF4F3FF); // Soft purple-tinted page bg
+  static const Color surfaceColor = Color(0xFFFFFFFF); // White
+  static const Color cardColor = Color(0xFFFFFFFF); // White cards
 
-  static const Color backgroundColor = Color(0xFFF8FAFC);
-  static const Color surfaceColor = Color(0xFFFFFFFF);
-  static const Color cardColor = Color(0xFFFFFFFF);
+  // Accent Colors
+  static const Color teal = Color(0xFF1D9E75);
+  static const Color amber = Color(0xFFEF9F27);
+  static const Color coral = Color(0xFFD85A30);
 
+  // Semantic Colors (mapped to accents)
+  static const Color accentColor = teal;
+  static const Color errorColor = coral;
+  static const Color warningColor = amber;
+
+  // Text Colors
   static const Color textPrimary = Color(0xFF1E293B);
   static const Color textSecondary = Color(0xFF64748B);
   static const Color textLight = Color(0xFF94A3B8);
+
+  // Status Colors
+  static const Color statusActiveBg = Color(0xFFE1F5EE);
+  static const Color statusActiveText = Color(0xFF0F6E56);
+  static const Color statusUpcomingBg = Color(0xFFFAEEDA);
+  static const Color statusUpcomingText = Color(0xFF854F0B);
+  static const Color statusCompletedBg = Color(0xFFF1F5F9);
+  static const Color statusCompletedText = Color(0xFF64748B);
 
   static ThemeData get lightTheme {
     return ThemeData(
       useMaterial3: true,
       colorScheme: ColorScheme.light(
         primary: primaryColor,
-        secondary: secondaryColor,
+        secondary: primaryLight,
         surface: surfaceColor,
         error: errorColor,
         onPrimary: Colors.white,
@@ -33,7 +50,10 @@ class AppTheme {
         color: cardColor,
         elevation: 0,
         shadowColor: Colors.black.withValues(alpha: 0.05),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+          side: const BorderSide(color: Color(0xFFE2E8F0), width: 0.5),
+        ),
       ),
       appBarTheme: AppBarTheme(
         backgroundColor: surfaceColor,
@@ -101,7 +121,7 @@ class AppTheme {
           elevation: 0,
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(25),
           ),
           textStyle: GoogleFonts.inter(
             fontSize: 16,
@@ -115,7 +135,7 @@ class AppTheme {
           side: const BorderSide(color: primaryColor, width: 1.5),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(25),
           ),
           textStyle: GoogleFonts.inter(
             fontSize: 16,
@@ -136,7 +156,7 @@ class AppTheme {
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Colors.grey.shade200),
+          borderSide: const BorderSide(color: Color(0xFFE2E8F0), width: 0.5),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),

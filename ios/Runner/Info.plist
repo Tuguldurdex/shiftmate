@@ -49,6 +49,12 @@
 	</dict>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>ShiftMate нууж бүртгэлээ түүний байршлыг шалгахын тулд таны байршлыг ашиглана.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>ShiftMate нууж бүртгэлээ түүний байршлыг шалгахын тулд таны байршлыг ашиглана.</string>
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>ShiftMate нууж бүртгэлээ түүний байршлыг шалгахын тулд таны байршлыг ашиглана.</string>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>

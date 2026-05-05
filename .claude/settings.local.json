@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(flutter create *)",
+      "Bash(flutter pub *)",
+      "PowerShell(Get-ChildItem \"C:\\\\flutter\\\\bin\\\\flutter.bat\" -ErrorAction SilentlyContinue; Get-ChildItem \"$env:LOCALAPPDATA\\\\flutter\\\\bin\\\\flutter.bat\" -ErrorAction SilentlyContinue; Get-ChildItem \"C:\\\\src\\\\flutter\\\\bin\\\\flutter.bat\" -ErrorAction SilentlyContinue)",
+      "PowerShell(Get-ChildItem -Path \"C:\\\\\", \"$env:USERPROFILE\", \"$env:LOCALAPPDATA\", \"D:\\\\\", \"E:\\\\\" -Filter \"flutter.bat\" -Recurse -Depth 5 -ErrorAction SilentlyContinue | Select-Object -First 5 FullName)",
+      "Bash(C:\\\\Users\\\\student\\\\Documents\\\\flutter\\\\bin\\\\flutter.bat analyze *)",
+      "PowerShell(netstat -ano)",
+      "PowerShell($port7070 = \\(netstat -ano | findstr \"7070\" | findstr \"LISTENING\" | ForEach-Object { \\($_ -split '\\\\s+'\\)[-1] } | Select-Object -First 1\\); $port8080 = \\(netstat -ano | findstr \"8080\" | findstr \"LISTENING\" | ForEach-Object { \\($_ -split '\\\\s+'\\)[-1] } | Select-Object -First 1\\); if \\($port7070\\) { Stop-Process -Id $port7070 -Force -ErrorAction SilentlyContinue; Write-Host \"Killed PID $port7070 on 7070\" }; if \\($port8080\\) { Stop-Process -Id $port8080 -Force -ErrorAction SilentlyContinue; Write-Host \"Killed PID $port8080 on 8080\" })"
+    ]
+  }
+}

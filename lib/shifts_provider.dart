@@ -1,7 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../features/shifts/domain/shift_model.dart';
-import '../../services/mock_data_service.dart';
-import '../../core/utils/validation_utils.dart';
+import 'features/shifts/domain/shift_model.dart';
+import 'core/utils/validation_utils.dart';
 import 'providers.dart';
 
 final shiftsProvider = StateNotifierProvider<ShiftsNotifier, List<ShiftModel>>((
@@ -13,16 +12,13 @@ final shiftsProvider = StateNotifierProvider<ShiftsNotifier, List<ShiftModel>>((
 
 class ShiftsNotifier extends StateNotifier<List<ShiftModel>> {
   final String _userId;
-  final MockDataService _mockDataService = MockDataService();
 
   ShiftsNotifier(this._userId) : super([]) {
     _loadShifts();
   }
 
   void _loadShifts() {
-    if (_userId.isNotEmpty) {
-      state = _mockDataService.getMockShifts(_userId);
-    }
+    state = [];
   }
 
   Future<bool> addShift({
@@ -31,6 +27,7 @@ class ShiftsNotifier extends StateNotifier<List<ShiftModel>> {
     required DateTime endTime,
     required String role,
     String? notes,
+    WorkLocation? workLocation,
   }) async {
     try {
       await Future.delayed(const Duration(milliseconds: 500));
@@ -44,6 +41,7 @@ class ShiftsNotifier extends StateNotifier<List<ShiftModel>> {
         role: role,
         status: ShiftStatus.upcoming,
         notes: notes,
+        workLocation: workLocation,
         createdAt: DateTime.now(),
       );
 
@@ -98,7 +96,9 @@ class ShiftsNotifier extends StateNotifier<List<ShiftModel>> {
   }
 
   double getTotalHoursWorked() {
-    return _mockDataService.calculateTotalHours(state);
+    return state
+        .where((s) => s.status == ShiftStatus.completed)
+        .fold(0.0, (sum, s) => sum + s.hoursWorked);
   }
 }
 

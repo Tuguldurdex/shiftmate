@@ -6,17 +6,21 @@ import '../../domain/shift_model.dart';
 class ShiftCard extends StatelessWidget {
   final ShiftModel shift;
   final bool showDate;
+  final bool showActions;
   final VoidCallback? onTap;
   final VoidCallback? onEdit;
   final VoidCallback? onDelete;
+  final VoidCallback? onClockIn;
 
   const ShiftCard({
     super.key,
     required this.shift,
     this.showDate = true,
+    this.showActions = true,
     this.onTap,
     this.onEdit,
     this.onDelete,
+    this.onClockIn,
   });
 
   @override
@@ -131,11 +135,20 @@ class ShiftCard extends StatelessWidget {
                   ),
                 ),
               ],
-              if (onEdit != null || onDelete != null) ...[
+              if (onEdit != null || onDelete != null || onClockIn != null) ...[
                 const SizedBox(height: 12),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
+                    if (onClockIn != null && shift.workLocation != null)
+                      TextButton.icon(
+                        onPressed: onClockIn,
+                        icon: const Icon(Icons.access_time, size: 18),
+                        label: const Text('Clock In'),
+                        style: TextButton.styleFrom(
+                          foregroundColor: AppTheme.accentColor,
+                        ),
+                      ),
                     if (onEdit != null)
                       TextButton.icon(
                         onPressed: onEdit,

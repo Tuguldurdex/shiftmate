@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">ShiftMate</string>
+    
+    <!-- Navigation -->
+    <string name="back">Буцах</string>
+    <string name="next">Дараах</string>
+    <string name="cancel">Цуцлах</string>
+    <string name="ok">Тийм</string>
+    <string name="save">Хадгалах</string>
+    <string name="delete">Устгах</string>
+    <string name="search">Хайх</string>
+    <string name="settings">Тохиргоо</string>
+    <string name="home">Нүүр</string>
+    <string name="profile">Профайл</string>
+    <string name="logout">Гарах</string>
+    
+    <!-- Auth -->
+    <string name="login">Нэвтрэх</string>
+    <string name="register">Бүртгүүлэх</string>
+    <string name="email">Имэйл</string>
+    <string name="password">Нууц үг</string>
+    <string name="confirm_password">Нууц үг баталгаа</string>
+    <string name="full_name">Бүтэн нэр</string>
+    <string name="sign_in">Нэвтрэх</string>
+    <string name="sign_up">Бүртгэх</string>
+    <string name="dont_have_account">Бүртгэлгүй юу?</string>
+    <string name="already_have_account">Бүртгэлтэй юу?</string>
+    <string name="welcome_back">Тавтай морил</string>
+    <string name="create_account">Бүртгэл үүсгэх</string>
+    <string name="sign_in_to_continue">ShiftMate-д нэвтрэхэд тавтай морил</string>
+    <string name="sign_up_to_get_started">ShiftMate-тай эхлэхийн тулд бүртгэл үүсгээд</string>
+    
+    <!-- Dashboard -->
+    <string name="dashboard">Хяналт</string>
+    <string name="todays_shifts">Өнөөдрийн ээлж</string>
+    <string name="hours_worked">Ажилласан цаг</string>
+    <string name="upcoming">Дараах</string>
+    <string name="notifications">Мэдэгдэл</string>
+    <string name="no_shifts_today">Өнөөдөр ээлж байхгүй</string>
+    <string name="no_upcoming_shifts">Дараах ээлж байхгүй</string>
+    <string name="view_all">Бүгдийг харах</string>
+    
+    <!-- Shifts -->
+    <string name="my_shifts">Миний ээлж</string>
+    <string name="all">Бүх</string>
+    <string name="calendar">Календар</string>
+    <string name="stats">Статистик</string>
+    <string name="add_new_shift">Шинэ ээлж нэмэх</string>
+    <string name="edit_shift">Ээлж засах</string>
+    <string name="shift_details">Ээлжийн дэлгэрэнгүй</string>
+    <string name="date">Огноо</string>
+    <string name="time">Цаг</string>
+    <string name="start">Эхлэх</string>
+    <string name="end">Дуусах</string>
+    <string name="role">Ажил</string>
+    <string name="notes">Тэмдэглэл</string>
+    <string name="notes_optional">Тэмдэглэл (Сонгох)</string>
+    <string name="add_any_notes">Ээлжийн талаар тэмдэглэл нэмэх...</string>
+    <string name="create_shift">Ээлж үүсгэх</string>
+    <string name="update_shift">Ээлж шинэчлэх</string>
+    <string name="shift_created_successfully">Ээлж амжилттай үүсгэгдлээ</string>
+    <string name="shift_updated_successfully">Ээлж амжилттай шинэчлэгдлээ</string>
+    <string name="delete_shift">Ээлж устгах</string>
+    <string name="delete_shift_confirmation">Ээлж устгахдаа итгэлтэй байна уу?</string>
+    <string name="no_shifts_scheduled">Төлөвлөсөн ээлж байхгүй</string>
+    <string name="tap_to_add_new_shift">Шинэ ээлж нэмэхдээ + дарна уу</string>
+    <string name="shifts_this_month">ээлж энэ сард</string>
+    
+    <!-- Roles -->
+    <string name="role_manager">Дарга</string>
+    <string name="role_cashier">Кассчин</string>
+    <string name="role_server">Үйлчлэгч</string>
+    <string name="role_kitchen_staff">Гал тогооны ажилтан</string>
+    <string name="role_security">Аюулгүй</string>
+    <string name="role_cleaner">Цэвэрлэгч</string>
+    <string name="role_receptionist">Хүлээн авагч</string>
+    <string name="role_delivery">Хүргэгч</string>
+    
+    <!-- Status -->
+    <string name="status_upcoming">Дараах</string>
+    <string name="status_completed">Дууссан</string>
+    <string name="status_missed">Алдсан</string>
+    
+    <!-- Stats -->
+    <string name="total_hours_worked">Нийт ажилласан цаг</string>
+    <string name="completed">Дууссан</string>
+    <string name="total">Нийт</string>
+    <string name="missed">Алдсан</string>
+    
+    <!-- Profile -->
+    <string name="statistics">Статистик</string>
+    <string name="edit_profile">Профайл засах</string>
+    <string name="notification_settings">Мэдэгдэл</string>
+    <string name="help_support">Тусламж</string>
+    <string name="logout_confirmation">Гарахдаа итгэлтэй байна уу?</string>
+    
+    <!-- General -->
+    <string name="loading">Ачааллаж байна...</string>
+    <string name="error">Алдаа гарлаа</string>
+    <string name="success">Амжилттай</string>
+    <string name="yes">Тийм</string>
+    <string name="no">Үгүй</string>
+    <string name="today">Өнөөдөр</string>
+    <string name="tomorrow">Маргааш</string>
+    <string name="yesterday">Өчигдөр</string>
+    
+    <!-- Language -->
+    <string name="language">Хэл</string>
+    <string name="english">English</string>
+    <string name="mongolian">Монгол</string>
+    <string name="select_language">Хэл сонгох</string>
+    
+    <!-- Validation -->
+    <string name="email_required">Имэйл шаардлагатай</string>
+    <string name="invalid_email">Зөв имэйл оруулна уу</string>
+    <string name="password_required">Нууц үг шаардлагатай</string>
+    <string name="password_min_length">Нууц үг дор хаяж 6 тэмдэгт байх ёстой</string>
+    <string name="name_required">Нэр шаардлагатай</string>
+    <string name="name_min_length">Нэр дор хаяж 2 тэмдэгт байх ёстой</string>
+    <string name="passwords_do_not_match">Нууц үг тохирохгүй байна</string>
+</resources>

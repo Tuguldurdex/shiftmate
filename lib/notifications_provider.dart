@@ -1,29 +1,15 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../features/dashboard/domain/notification_model.dart';
-import '../../services/mock_data_service.dart';
-import 'providers.dart';
+import 'features/dashboard/domain/notification_model.dart';
 
 final notificationsProvider =
     StateNotifierProvider<NotificationsNotifier, List<NotificationModel>>((
       ref,
     ) {
-      final authState = ref.watch(authProvider);
-      return NotificationsNotifier(authState.user?.id ?? '');
+      return NotificationsNotifier();
     });
 
 class NotificationsNotifier extends StateNotifier<List<NotificationModel>> {
-  final String _userId;
-  final MockDataService _mockDataService = MockDataService();
-
-  NotificationsNotifier(this._userId) : super([]) {
-    _loadNotifications();
-  }
-
-  void _loadNotifications() {
-    if (_userId.isNotEmpty) {
-      state = _mockDataService.getMockNotifications(_userId);
-    }
-  }
+  NotificationsNotifier() : super([]);
 
   void markAsRead(String notificationId) {
     state = state

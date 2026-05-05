@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Orange Circle Background -->
+    <path
+        android:fillColor="#FF6600"
+        android:pathData="M54,54m-54,0a54,54 0,1 1,108 0a54,54 0,1 1,-108 0" />
+
+    <!-- White Shift Arrow (Upward pointing arrow with horizontal line) -->
+    <group
+        android:translateX="0"
+        android:translateY="0">
+
+        <!-- Arrow Shaft -->
+        <path
+            android:fillColor="#FFFFFF"
+            android:pathData="M50,68L50,42L44,42L44,68L38,68L54,82L70,68L64,68L64,42L58,42L58,68Z" />
+
+        <!-- Arrow Head (Triangle) -->
+        <path
+            android:fillColor="#FFFFFF"
+            android:pathData="M54,28L32,54L44,54L44,68L64,68L64,54L76,54L54,28Z" />
+
+    </group>
+
+</vector>
