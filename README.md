@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # shift_mate
 
 A new Flutter project.
@@ -15,3 +16,6 @@ A few resources to get you started if this is your first Flutter project:
 For help getting started with Flutter development, view the
 [online documentation](https://docs.flutter.dev/), which offers tutorials,
 samples, guidance on mobile development, and a full API reference.
+=======
+# shiftmate
+>>>>>>> 9e92cb4dd6907a1b2f262c88827519ea5811340c
