@@ -14,7 +14,7 @@
     This is a placeholder for base href that will be replaced by the value of
     the `--base-href` argument provided to `flutter build`.
   -->
-  <base href="$FLUTTER_BASE_HREF">
+  <base href="/">
 
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
@@ -29,18 +29,46 @@
   <!-- Favicon -->
   <link rel="icon" type="image/png" href="favicon.png"/>
 
-  <title>shift_mate</title>
+  <title>ShiftMate - Smart Shift Management</title>
   <link rel="manifest" href="manifest.json">
+
+  <script>
+    // Prevent white screen flash
+    document.body.style.backgroundColor = '#F4F3FF';
+  </script>
 </head>
 <body>
-  <!--
-    You can customize the "flutter_bootstrap.js" script.
-    This is useful to provide a custom configuration to the Flutter loader
-    or to give the user feedback during the initialization process.
+  <!-- Loading indicator to prevent white screen -->
+  <div id="loading-indicator" style="display: flex; justify-content: center; align-items: center; height: 100vh; flex-direction: column; font-family: Inter, sans-serif;">
+    <div style="width: 40px; height: 40px; border: 4px solid #E2E8F0; border-top: 4px solid #534AB7; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+    <p style="margin-top: 16px; color: #64748B;">Loading ShiftMate...</p>
+  </div>
+  <style>
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
 
-    For more details:
-    * https://docs.flutter.dev/platform-integration/web/initialization
-  -->
-  <script src="flutter_bootstrap.js" async></script>
+  <script>
+    // Flutter loader configuration
+    window.addEventListener('load', function(ev) {
+      // Remove loading indicator once Flutter is ready
+      if (window.flutterWebRenderer) {
+        document.getElementById('loading-indicator').style.display = 'none';
+      }
+    });
+
+    // Service worker fix for some hosting providers
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(function(registrations) {
+        for (let registration of registrations) {
+          registration.unregister();
+        }
+      });
+    }
+  </script>
+
+  <script src="flutter_bootstrap.js" defer></script>
 </body>
 </html>

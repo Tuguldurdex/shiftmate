@@ -9,6 +9,7 @@ import '../../domain/group_chat_model.dart';
 import '../providers/chat_provider.dart';
 import '../widgets/group_info_panel.dart';
 import '../widgets/slash_command_menu.dart';
+import '../widgets/typing_indicator.dart';
 
 class GroupChatScreen extends ConsumerStatefulWidget {
   final String groupId;
@@ -86,11 +87,11 @@ class _GroupChatScreenState extends ConsumerState<GroupChatScreen> {
     final typingUsers = chatState.typingUsersByGroup[widget.groupId] ?? [];
     final aiIsThinking = chatState.aiIsThinking && chatState.aiThinkingGroupId == widget.groupId;
     final currentUserId = ref.read(authProvider).user?.id ?? 'emp1';
-    final ollamaConnected = ref.watch(ollamaConnectionProvider);
+    final groqConnected = ref.watch(groqConnectionProvider);
 
     return Scaffold(
       backgroundColor: AppTheme.backgroundColor,
-      appBar: _buildAppBar(group, ollamaConnected),
+      appBar: _buildAppBar(group, groqConnected),
       body: Column(
         children: [
           Expanded(
@@ -107,8 +108,7 @@ class _GroupChatScreenState extends ConsumerState<GroupChatScreen> {
                       final showSender = !isCurrentUser &&
                           (index == 0 || messages[index - 1].senderId != message.senderId);
                       final previousMessage = index > 0 ? messages[index - 1] : null;
-                      final isConsecutive = previousMessage != null &&
-                          previousMessage.senderId == message.senderId;
+                      final isConsecutive = previousMessage != null && previousMessage.senderId == message.senderId;
 
                       return _buildMessageBubble(
                         message,
@@ -121,7 +121,7 @@ class _GroupChatScreenState extends ConsumerState<GroupChatScreen> {
                     },
                   ),
           ),
-          if (aiIsThinking) _buildAiThinkingIndicator(),
+          if (aiIsThinking) const TypingIndicator(userName: 'ShiftMate AI', isAi: true),
           if (typingUsers.isNotEmpty && !aiIsThinking) _buildTypingIndicator(typingUsers),
           if (_showSlashMenu)
             SlashCommandMenu(
@@ -139,7 +139,7 @@ class _GroupChatScreenState extends ConsumerState<GroupChatScreen> {
     );
   }
 
-  PreferredSizeWidget _buildAppBar(GroupChat group, bool ollamaConnected) {
+  PreferredSizeWidget _buildAppBar(GroupChat group, bool groqConnected) {
     return AppBar(
       title: GestureDetector(
         onTap: () => _openGroupInfo(group),
@@ -153,27 +153,20 @@ class _GroupChatScreenState extends ConsumerState<GroupChatScreen> {
               children: [
                 Text(
                   group.name,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                 ),
                 Row(
                   children: [
                     Text(
                       '${group.memberCount} members • ${group.onlineMemberCount} online',
-                      style: const TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.normal,
-                        color: AppTheme.textSecondary,
-                      ),
+                      style: const TextStyle(fontSize: 11, fontWeight: FontWeight.normal, color: AppTheme.textSecondary),
                     ),
                     const SizedBox(width: 6),
                     Container(
                       width: 8,
                       height: 8,
                       decoration: BoxDecoration(
-                        color: ollamaConnected ? AppTheme.accentColor : AppTheme.errorColor,
+                        color: groqConnected ? AppTheme.accentColor : AppTheme.errorColor,
                         shape: BoxShape.circle,
                       ),
                     ),
@@ -226,28 +219,11 @@ class _GroupChatScreenState extends ConsumerState<GroupChatScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.chat_bubble_outline,
-            size: 64,
-            color: AppTheme.textLight,
-          ),
+          Icon(Icons.chat_bubble_outline, size: 64, color: AppTheme.textLight),
           const SizedBox(height: 16),
-          const Text(
-            'No messages yet',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
-              color: AppTheme.textSecondary,
-            ),
-          ),
+          const Text('No messages yet', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: AppTheme.textSecondary)),
           const SizedBox(height: 8),
-          const Text(
-            'Say hello! \u{1F44B}',
-            style: TextStyle(
-              fontSize: 14,
-              color: AppTheme.textLight,
-            ),
-          ),
+          const Text('Say hello! \u{1F44B}', style: TextStyle(fontSize: 14, color: AppTheme.textLight)),
         ],
       ),
     );
@@ -264,7 +240,9 @@ class _GroupChatScreenState extends ConsumerState<GroupChatScreen> {
     return Padding(
       padding: EdgeInsets.only(top: isConsecutive ? 2 : 8, bottom: isConsecutive ? 2 : 8),
       child: Row(
-        mainAxisAlignment: isAi ? MainAxisAlignment.start : (isCurrentUser ? MainAxisAlignment.end : MainAxisAlignment.start),
+        mainAxisAlignment: isAi
+            ? MainAxisAlignment.start
+            : (isCurrentUser ? MainAxisAlignment.end : MainAxisAlignment.start),
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           if (!isCurrentUser) ...[
@@ -280,7 +258,7 @@ class _GroupChatScreenState extends ConsumerState<GroupChatScreen> {
                     padding: const EdgeInsets.only(left: 4, bottom: 4),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
-                    children: [
+                      children: [
                         Text(
                           message.senderName,
                           style: TextStyle(
@@ -297,14 +275,7 @@ class _GroupChatScreenState extends ConsumerState<GroupChatScreen> {
                               color: AppTheme.primaryColor.withValues(alpha: 0.15),
                               borderRadius: BorderRadius.circular(4),
                             ),
-                            child: const Text(
-                              'AI',
-                              style: TextStyle(
-                                fontSize: 8,
-                                fontWeight: FontWeight.bold,
-                                color: AppTheme.primaryColor,
-                              ),
-                            ),
+                            child: const Text('AI', style: TextStyle(fontSize: 8, fontWeight: FontWeight.bold, color: AppTheme.primaryColor)),
                           ),
                         ],
                       ],
@@ -313,17 +284,13 @@ class _GroupChatScreenState extends ConsumerState<GroupChatScreen> {
                 AnimatedContainer(
                   duration: const Duration(milliseconds: 300),
                   curve: Curves.easeOut,
-                  constraints: BoxConstraints(
-                    maxWidth: MediaQuery.of(context).size.width * 0.7,
-                  ),
+                  constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.7),
                   padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                   decoration: BoxDecoration(
                     color: isAi
                         ? const Color(0xFFEEEDFE)
                         : (isCurrentUser
-                            ? (message.type == MessageType.mention
-                                ? AppTheme.primaryColor.withValues(alpha: 0.85)
-                                : AppTheme.primaryColor)
+                            ? (message.type == MessageType.mention ? AppTheme.primaryColor.withValues(alpha: 0.85) : AppTheme.primaryColor)
                             : AppTheme.surfaceColor),
                     borderRadius: BorderRadius.only(
                       topLeft: const Radius.circular(16),
@@ -333,9 +300,7 @@ class _GroupChatScreenState extends ConsumerState<GroupChatScreen> {
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: isAi
-                            ? AppTheme.secondaryColor.withValues(alpha: 0.1)
-                            : Colors.black.withValues(alpha: 0.05),
+                        color: isAi ? AppTheme.primaryColor.withValues(alpha: 0.1) : Colors.black.withValues(alpha: 0.05),
                         blurRadius: 5,
                         offset: const Offset(0, 2),
                       ),
@@ -353,11 +318,7 @@ class _GroupChatScreenState extends ConsumerState<GroupChatScreen> {
                             message.formattedTime,
                             style: TextStyle(
                               fontSize: 10,
-                              color: isAi
-                                  ? AppTheme.textSecondary
-                                  : (isCurrentUser
-                                      ? Colors.white.withValues(alpha: 0.7)
-                                      : AppTheme.textLight),
+                              color: isAi ? AppTheme.textSecondary : (isCurrentUser ? Colors.white.withValues(alpha: 0.7) : AppTheme.textLight),
                             ),
                           ),
                           if (isAi && message.aiModel != null) ...[
@@ -368,31 +329,14 @@ class _GroupChatScreenState extends ConsumerState<GroupChatScreen> {
                                 color: AppTheme.primaryColor.withValues(alpha: 0.1),
                                 borderRadius: BorderRadius.circular(4),
                               ),
-                              child: Text(
-                                message.aiModel!,
-                                style: TextStyle(
-                                  fontSize: 9,
-                                  fontWeight: FontWeight.w500,
-                                  color: AppTheme.primaryColor,
-                                ),
-                              ),
+                              child: Text(message.aiModel!, style: const TextStyle(fontSize: 9, fontWeight: FontWeight.w500, color: AppTheme.primaryColor)),
                             ),
                           ],
                           if (isCurrentUser && message.readCount > 0) ...[
                             const SizedBox(width: 4),
-                            Icon(
-                              Icons.done_all,
-                              size: 12,
-                              color: Colors.white.withValues(alpha: 0.7),
-                            ),
+                            Icon(Icons.done_all, size: 12, color: Colors.white.withValues(alpha: 0.7)),
                             const SizedBox(width: 2),
-                            Text(
-                              '${message.readCount}',
-                              style: TextStyle(
-                                fontSize: 9,
-                                color: Colors.white.withValues(alpha: 0.7),
-                              ),
-                            ),
+                            Text('${message.readCount}', style: TextStyle(fontSize: 9, color: Colors.white.withValues(alpha: 0.7))),
                           ],
                         ],
                       ),
@@ -414,10 +358,7 @@ class _GroupChatScreenState extends ConsumerState<GroupChatScreen> {
                             ),
                             const SizedBox(width: 8),
                             IconButton(
-                              icon: Icon(
-                                message.feedbackPositive == true ? Icons.thumb_up : Icons.thumb_up_outlined,
-                                size: 14,
-                              ),
+                              icon: Icon(message.feedbackPositive == true ? Icons.thumb_up : Icons.thumb_up_outlined, size: 14),
                               padding: EdgeInsets.zero,
                               constraints: const BoxConstraints(),
                               color: message.feedbackPositive == true ? AppTheme.accentColor : AppTheme.textSecondary,
@@ -427,10 +368,7 @@ class _GroupChatScreenState extends ConsumerState<GroupChatScreen> {
                             ),
                             const SizedBox(width: 4),
                             IconButton(
-                              icon: Icon(
-                                message.feedbackPositive == false ? Icons.thumb_down : Icons.thumb_down_outlined,
-                                size: 14,
-                              ),
+                              icon: Icon(message.feedbackPositive == false ? Icons.thumb_down : Icons.thumb_down_outlined, size: 14),
                               padding: EdgeInsets.zero,
                               constraints: const BoxConstraints(),
                               color: message.feedbackPositive == false ? AppTheme.errorColor : AppTheme.textSecondary,
@@ -440,10 +378,7 @@ class _GroupChatScreenState extends ConsumerState<GroupChatScreen> {
                             ),
                             if (message.responseTimeMs != null) ...[
                               const Spacer(),
-                              Text(
-                                '${message.responseTimeMs}ms',
-                                style: const TextStyle(fontSize: 9, color: AppTheme.textLight),
-                              ),
+                              Text('${message.responseTimeMs}ms', style: const TextStyle(fontSize: 9, color: AppTheme.textLight)),
                             ],
                           ],
                         ),
@@ -473,17 +408,10 @@ class _GroupChatScreenState extends ConsumerState<GroupChatScreen> {
           if (part.startsWith('@')) {
             return TextSpan(
               text: '$part ',
-              style: TextStyle(
-                color: isCurrentUser ? Colors.yellow : AppTheme.primaryColor,
-                fontWeight: FontWeight.w600,
-                fontSize: 14,
-              ),
+              style: TextStyle(color: isCurrentUser ? Colors.yellow : AppTheme.primaryColor, fontWeight: FontWeight.w600, fontSize: 14),
             );
           }
-          return TextSpan(
-            text: '$part ',
-            style: TextStyle(color: textColor, fontSize: 14),
-          );
+          return TextSpan(text: '$part ', style: TextStyle(color: textColor, fontSize: 14));
         }).toList(),
       ),
     );
@@ -494,191 +422,78 @@ class _GroupChatScreenState extends ConsumerState<GroupChatScreen> {
       width: 32,
       height: 32,
       decoration: BoxDecoration(
-        color: isAi ? AppTheme.secondaryColor : _getColorForName(name),
+        color: isAi ? AppTheme.primaryColor : _getColorForName(name),
         shape: BoxShape.circle,
       ),
       child: Center(
         child: isAi
             ? const Text('\u{1F916}', style: TextStyle(fontSize: 16))
-            : Text(
-                initials,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w600,
-                  fontSize: 11,
-                ),
-              ),
+            : Text(initials, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 11)),
       ),
     );
   }
 
-  Widget _buildAiThinkingIndicator() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-      child: Row(
-        children: [
-          Container(
-            width: 24,
-            height: 24,
-            decoration: BoxDecoration(
-              color: AppTheme.secondaryColor.withValues(alpha: 0.15),
-              shape: BoxShape.circle,
-            ),
-            child: const Center(
-              child: Text('\u{1F916}', style: TextStyle(fontSize: 12)),
-            ),
-          ),
-          const SizedBox(width: 8),
-          Text(
-            'AI Assistant is thinking',
-            style: const TextStyle(
-              fontSize: 12,
-              color: AppTheme.secondaryColor,
-              fontStyle: FontStyle.italic,
-            ),
-          ),
-          const SizedBox(width: 4),
-          SizedBox(
-            width: 16,
-            height: 16,
-            child: CircularProgressIndicator(
-              strokeWidth: 2,
-              valueColor: AlwaysStoppedAnimation<Color>(AppTheme.secondaryColor),
-            ),
-          ),
-        ],
-      ),
-    );
+  Color _getColorForName(String name) {
+    final colors = [AppTheme.primaryColor, AppTheme.accentColor, AppTheme.warningColor, AppTheme.errorColor];
+    final hash = name.hashCode.abs();
+    return colors[hash % colors.length];
   }
 
   Widget _buildTypingIndicator(List<String> typingUsers) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-      child: Row(
-        children: [
-          const SizedBox(
-            width: 20,
-            height: 20,
-            child: CircularProgressIndicator(
-              strokeWidth: 2,
-              valueColor: AlwaysStoppedAnimation<Color>(AppTheme.textLight),
-            ),
-          ),
-          const SizedBox(width: 8),
-          Text(
-            typingUsers.length == 1
-                ? '${typingUsers.first} is typing...'
-                : '${typingUsers.join(', ')} are typing...',
-            style: const TextStyle(
-              fontSize: 12,
-              color: AppTheme.textSecondary,
-              fontStyle: FontStyle.italic,
-            ),
-          ),
-        ],
-      ),
-    );
+    if (typingUsers.isEmpty) return const SizedBox.shrink();
+    final name = typingUsers.first;
+    return TypingIndicator(userName: name);
   }
 
   Widget _buildMessageInput(GroupChat group) {
-    final isAiEnabled = group.aiEnabled;
-    final ollamaConnected = ref.watch(ollamaConnectionProvider);
-
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: AppTheme.surfaceColor,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, -2),
+        border: Border(top: BorderSide(color: Colors.grey.shade200)),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: TextField(
+              controller: _messageController,
+              decoration: InputDecoration(
+                hintText: 'Type a message... (use @ai for AI)',
+                hintStyle: const TextStyle(color: AppTheme.textLight),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(24),
+                  borderSide: BorderSide.none,
+                ),
+                filled: true,
+                fillColor: AppTheme.backgroundColor,
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              ),
+              maxLines: null,
+              textInputAction: TextInputAction.send,
+              onSubmitted: (text) {
+                if (text.trim().isNotEmpty) {
+                  ref.read(chatProvider.notifier).sendMessage(text);
+                  _messageController.clear();
+                  _scrollToBottom();
+                }
+              },
+            ),
+          ),
+          const SizedBox(width: 8),
+          IconButton(
+            icon: const Icon(Icons.send),
+            color: AppTheme.primaryColor,
+            onPressed: () {
+              final text = _messageController.text.trim();
+              if (text.isNotEmpty) {
+                ref.read(chatProvider.notifier).sendMessage(text);
+                _messageController.clear();
+                _scrollToBottom();
+              }
+            },
           ),
         ],
       ),
-      child: SafeArea(
-        child: Row(
-          children: [
-            if (isAiEnabled && ollamaConnected)
-              GestureDetector(
-                onTap: () {
-                  _messageController.text = '@AI ';
-                  _messageController.selection = TextSelection.fromPosition(
-                    TextPosition(offset: _messageController.text.length),
-                  );
-                },
-                child: Container(
-                  width: 40,
-                  height: 40,
-                  margin: const EdgeInsets.only(right: 8),
-                  decoration: BoxDecoration(
-                    color: AppTheme.secondaryColor.withValues(alpha: ollamaConnected ? 0.15 : 0.08),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    Icons.smart_toy_outlined,
-                    color: ollamaConnected ? AppTheme.secondaryColor : AppTheme.textLight,
-                    size: 20,
-                  ),
-                ),
-              ),
-            Expanded(
-              child: Container(
-                decoration: BoxDecoration(
-                  color: AppTheme.backgroundColor,
-                  borderRadius: BorderRadius.circular(24),
-                  border: Border.all(color: Colors.grey.shade200),
-                ),
-                child: TextField(
-                  controller: _messageController,
-                  decoration: InputDecoration(
-                    hintText: isAiEnabled ? 'Type a message... /ai or @AI to use AI' : 'Type a message...',
-                    hintStyle: const TextStyle(color: AppTheme.textLight),
-                    border: InputBorder.none,
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  ),
-                  textCapitalization: TextCapitalization.sentences,
-                  maxLines: 4,
-                  minLines: 1,
-                  onSubmitted: (_) => _sendMessage(),
-                ),
-              ),
-            ),
-            const SizedBox(width: 8),
-            Container(
-              decoration: const BoxDecoration(
-                color: AppTheme.primaryColor,
-                shape: BoxShape.circle,
-              ),
-              child: IconButton(
-                icon: const Icon(Icons.send, color: Colors.white, size: 20),
-                onPressed: _sendMessage,
-              ),
-            ),
-          ],
-        ),
-      ),
     );
-  }
-
-  void _sendMessage() {
-    if (_messageController.text.trim().isNotEmpty) {
-      ref.read(chatProvider.notifier).sendMessage(_messageController.text);
-      _messageController.clear();
-      setState(() => _showSlashMenu = false);
-      _scrollToBottom();
-    }
-  }
-
-  Color _getColorForName(String name) {
-    final colors = [
-      AppTheme.primaryColor,
-      AppTheme.secondaryColor,
-      AppTheme.accentColor,
-      const Color(0xFFEC4899),
-      const Color(0xFF14B8A6),
-      const Color(0xFFF97316),
-    ];
-    return colors[name.hashCode.abs() % colors.length];
   }
 }

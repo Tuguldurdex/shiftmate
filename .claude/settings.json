@@ -57,7 +57,13 @@
       "Bash(dart /c/flutter/packages/flutter_tools/bin/flutter_tools.dart run -d chrome --web-port 7777)",
       "Bash(dart /c/flutter/packages/flutter_tools/bin/flutter_tools.dart pub get)",
       "Bash(tee /tmp/flutter_run10.log)",
-      "Bash(tee /tmp/flutter_run11.log)"
+      "Bash(tee /tmp/flutter_run11.log)",
+      "Bash(tee /tmp/flutter_run12.log)",
+      "Bash(dart /c/flutter/packages/flutter_tools/bin/flutter_tools.dart analyze lib/)",
+      "PowerShell(taskkill /F /PID 31928; Start-Sleep -Seconds 2; $proc = Start-Process -FilePath \"dart\" -ArgumentList \"C:/flutter/packages/flutter_tools/bin/flutter_tools.dart\",\"run\",\"-d\",\"chrome\",\"--web-port\",\"9090\" -PassThru -NoNewWindow -RedirectStandardOutput \"C:\\\\Users\\\\user\\\\AppData\\\\Local\\\\Temp\\\\flutter_run.log\" -RedirectStandardError \"C:\\\\Users\\\\user\\\\AppData\\\\Local\\\\Temp\\\\flutter_run_err.log\"; Write-Output \"PID: $\\($proc.Id\\)\"; Start-Sleep -Seconds 40; Get-Content \"C:\\\\Users\\\\user\\\\AppData\\\\Local\\\\Temp\\\\flutter_run.log\" -Tail 40)",
+      "PowerShell(Get-Process -Id 15808 -ErrorAction SilentlyContinue)",
+      "PowerShell(taskkill /F /IM dart.exe 2>$null)",
+      "PowerShell(cd \"e:\\\\android app\"; $proc = Start-Process -FilePath \"dart\" -ArgumentList \"C:/flutter/packages/flutter_tools/bin/flutter_tools.dart\",\"run\",\"-d\",\"chrome\",\"--web-port\",\"9090\" -PassThru -NoNewWindow -RedirectStandardOutput \"C:\\\\Users\\\\user\\\\AppData\\\\Local\\\\Temp\\\\flutter_run.log\" -RedirectStandardError \"C:\\\\Users\\\\user\\\\AppData\\\\Local\\\\Temp\\\\flutter_run_err.log\"; Write-Output \"PID: $\\($proc.Id\\)\")"
     ],
     "additionalDirectories": [
       "e:\\",

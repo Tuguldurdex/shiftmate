@@ -1,7 +1,7 @@
 import 'package:shared_preferences/shared_preferences.dart';
 
 class StorageService {
-  static const String _ollamaBaseUrlKey = 'ollama_server_url';
+  static const String _anthropicApiKey = 'anthropic_api_key';
 
   static late SharedPreferences _prefs;
 
@@ -9,11 +9,11 @@ class StorageService {
     _prefs = await SharedPreferences.getInstance();
   }
 
-  static Future<void> saveOllamaBaseUrl(String url) async {
-    await _prefs.setString(_ollamaBaseUrlKey, url);
+  static Future<void> saveAnthropicApiKey(String apiKey) async {
+    await _prefs.setString(_anthropicApiKey, apiKey);
   }
 
-  static String? getOllamaBaseUrl() {
-    return _prefs.getString(_ollamaBaseUrlKey);
+  static String? getAnthropicApiKey() {
+    return _prefs.getString(_anthropicApiKey);
   }
 }

@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_theme.dart';
-import '../../../../services/ollama_service.dart';
-import '../../../../services/storage_service.dart';
+import '../../../../services/groq_service.dart';
 import '../../domain/group_chat_model.dart';
 import '../providers/chat_provider.dart';
 
@@ -17,11 +16,9 @@ class AiSettingsPanel extends ConsumerStatefulWidget {
 
 class _AiSettingsPanelState extends ConsumerState<AiSettingsPanel> {
   late bool _aiEnabled;
-  late String _selectedModel;
   late double _temperature;
   late int _maxContext;
   late TextEditingController _systemPromptController;
-  late TextEditingController _baseUrlController;
   bool _isTesting = false;
   String? _connectionStatus;
 
@@ -29,22 +26,11 @@ class _AiSettingsPanelState extends ConsumerState<AiSettingsPanel> {
   void initState() {
     super.initState();
     _aiEnabled = widget.group.aiEnabled;
-    _selectedModel = widget.group.aiModel;
     _temperature = widget.group.aiTemperature;
     _maxContext = widget.group.aiMaxContextMessages;
-    _systemPromptController = TextEditingController(text: widget.group.aiSystemPrompt ?? '');
-    
-    // Load saved URL: storage first, then group setting, then empty
-    final savedUrl = StorageService.getOllamaBaseUrl();
-    final initialUrl = savedUrl?.isNotEmpty == true 
-        ? savedUrl! 
-        : (widget.group.aiBaseUrl ?? '');
-    _baseUrlController = TextEditingController(text: initialUrl);
-    
-    // Update the provider if we have a URL
-    if (initialUrl.isNotEmpty) {
-      ref.read(ollamaBaseUrlProvider.notifier).state = initialUrl;
-    }
+    _systemPromptController = TextEditingController(
+      text: widget.group.aiSystemPrompt ?? '',
+    );
   }
 
   @override
@@ -59,59 +45,44 @@ class _AiSettingsPanelState extends ConsumerState<AiSettingsPanel> {
       _connectionStatus = null;
     });
 
-    final baseUrl = _baseUrlController.text.trim();
-    if (baseUrl.isEmpty) {
-      setState(() {
-        _isTesting = false;
-        _connectionStatus = 'Enter a URL first';
-      });
-      return;
-    }
-
-    final ollama = OllamaService(baseUrl: baseUrl);
-    final connected = await ollama.checkConnection();
+    final groq = ref.read(groqServiceProvider);
+    final response = await groq.chat(
+      messages: [GroqMessage(role: 'user', content: 'Hi')],
+    );
 
     if (!mounted) return;
 
     setState(() {
       _isTesting = false;
-      _connectionStatus = connected ? 'Connected ✅' : 'Could not connect ❌';
+      _connectionStatus = response.success ? 'Connected ✅' : 'Could not connect ❌';
     });
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
-          connected
-              ? '✅ Ollama connected at $baseUrl!'
-              : '❌ Cannot reach Ollama at $baseUrl.\nMake sure Ollama is running and the IP is correct.',
+          response.success
+              ? '✅ Groq API connected!'
+              : '❌ Cannot connect to Groq API.\nCheck your GROQ_API_KEY in .env file.',
         ),
         behavior: SnackBarBehavior.floating,
-        backgroundColor: connected ? AppTheme.accentColor : AppTheme.errorColor,
+        backgroundColor:
+            response.success ? AppTheme.accentColor : AppTheme.errorColor,
         duration: const Duration(seconds: 4),
       ),
     );
 
-    ref.read(ollamaConnectionProvider.notifier).state = connected;
-    // Update the base URL provider so the chat provider picks it up
-    ref.read(ollamaBaseUrlProvider.notifier).state = baseUrl;
-    // Save to persistent storage
-    await StorageService.saveOllamaBaseUrl(baseUrl);
+    ref.read(groqConnectionProvider.notifier).state = response.success;
   }
 
   void _saveSettings() {
-    final baseUrl = _baseUrlController.text.trim();
-    if (baseUrl.isNotEmpty) {
-      ref.read(ollamaBaseUrlProvider.notifier).state = baseUrl;
-      StorageService.saveOllamaBaseUrl(baseUrl);
-    }
-    ref.read(chatProvider.notifier).updateAiSettings(
+    ref.read(chatProvider.notifier).updateGroupInfo(
       widget.group.id,
       aiEnabled: _aiEnabled,
-      aiModel: _selectedModel,
       aiTemperature: _temperature,
       aiMaxContextMessages: _maxContext,
-      aiSystemPrompt: _systemPromptController.text.trim().isEmpty ? null : _systemPromptController.text.trim(),
-      aiBaseUrl: baseUrl.isNotEmpty ? baseUrl : null,
+      aiSystemPrompt: _systemPromptController.text.trim().isEmpty
+          ? null
+          : _systemPromptController.text.trim(),
     );
     Navigator.of(context).pop();
   }
@@ -126,10 +97,7 @@ class _AiSettingsPanelState extends ConsumerState<AiSettingsPanel> {
           children: [
             const Text(
               'AI Assistant',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-              ),
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
             ),
             Switch(
               value: _aiEnabled,
@@ -139,9 +107,8 @@ class _AiSettingsPanelState extends ConsumerState<AiSettingsPanel> {
           ],
         ),
         if (_aiEnabled) ...[
-          _buildBaseUrlField(),
           const SizedBox(height: 16),
-          _buildModelSelector(),
+          _buildModelInfo(),
           const SizedBox(height: 16),
           _buildTemperatureSlider(),
           const SizedBox(height: 16),
@@ -163,72 +130,7 @@ class _AiSettingsPanelState extends ConsumerState<AiSettingsPanel> {
     );
   }
 
-  Widget _buildBaseUrlField() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            const Text(
-              'Ollama Server URL',
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w500,
-                color: AppTheme.textSecondary,
-              ),
-            ),
-            const SizedBox(width: 8),
-            GestureDetector(
-              onTap: () {
-                showDialog(
-                  context: context,
-                  builder: (ctx) => AlertDialog(
-                    title: const Text('Finding Your Computer\'s IP'),
-                    content: const Text(
-                      '1. Make sure your phone and computer are on the same WiFi\n'
-                      '2. On your computer, open terminal and run:\n'
-                      '   • Windows: ipconfig → look for "IPv4 Address"\n'
-                      '   • Mac/Linux: ifconfig or ip addr\n'
-                      '3. Use that IP with port 11434\n'
-                      '   Example: http://192.168.1.100:11434',
-                    ),
-                    actions: [
-                      TextButton(
-                        onPressed: () => Navigator.pop(ctx),
-                        child: const Text('OK'),
-                      ),
-                    ],
-                  ),
-                );
-              },
-              child: Icon(
-                Icons.help_outline,
-                size: 16,
-                color: AppTheme.textLight,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 8),
-        TextField(
-          controller: _baseUrlController,
-          decoration: InputDecoration(
-            hintText: 'http://192.168.1.XXX:11434',
-            filled: true,
-            fillColor: AppTheme.backgroundColor,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide.none,
-            ),
-            contentPadding: const EdgeInsets.all(12),
-          ),
-          style: const TextStyle(fontSize: 13),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildModelSelector() {
+  Widget _buildModelInfo() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -242,27 +144,27 @@ class _AiSettingsPanelState extends ConsumerState<AiSettingsPanel> {
         ),
         const SizedBox(height: 8),
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
           decoration: BoxDecoration(
             color: AppTheme.backgroundColor,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.grey.shade200),
+            border: Border.all(color: const Color(0xFFE2E8F0), width: 0.5),
           ),
-          child: DropdownButtonHideUnderline(
-            child: DropdownButton<String>(
-              value: _selectedModel,
-              isExpanded: true,
-              items: OllamaService.availableModels.map((model) {
-                return DropdownMenuItem(
-                  value: model,
-                  child: Text(model),
-                );
-              }).toList(),
-              onChanged: (v) {
-                if (v != null) setState(() => _selectedModel = v);
-              },
-            ),
+          child: Row(
+            children: [
+              const Icon(Icons.smart_toy, size: 16, color: AppTheme.primaryColor),
+              const SizedBox(width: 8),
+              const Text(
+                'llama3-8b-8192 (Groq)',
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+              ),
+            ],
           ),
+        ),
+        const SizedBox(height: 8),
+        const Text(
+          'Set GROQ_API_KEY in your .env file',
+          style: TextStyle(fontSize: 11, color: AppTheme.textLight),
         ),
       ],
     );
@@ -394,7 +296,10 @@ class _AiSettingsPanelState extends ConsumerState<AiSettingsPanel> {
                 ? const SizedBox(
                     width: 16,
                     height: 16,
-                    child: CircularProgressIndicator(strokeWidth: 2, valueColor: AlwaysStoppedAnimation(Colors.white)),
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: AlwaysStoppedAnimation(Colors.white),
+                    ),
                   )
                 : const Icon(Icons.wifi_find),
             label: Text(_isTesting ? 'Testing...' : 'Test Connection'),
@@ -408,7 +313,7 @@ class _AiSettingsPanelState extends ConsumerState<AiSettingsPanel> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
             decoration: BoxDecoration(
-              color: _connectionStatus == 'Connected'
+              color: _connectionStatus!.contains('✅')
                   ? AppTheme.accentColor.withValues(alpha: 0.15)
                   : AppTheme.errorColor.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(8),
@@ -418,7 +323,9 @@ class _AiSettingsPanelState extends ConsumerState<AiSettingsPanel> {
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w500,
-                color: _connectionStatus == 'Connected' ? AppTheme.accentColor : AppTheme.errorColor,
+                color: _connectionStatus!.contains('✅')
+                    ? AppTheme.accentColor
+                    : AppTheme.errorColor,
               ),
             ),
           ),

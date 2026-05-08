@@ -1,11 +1,11 @@
 {
-    "name": "shift_mate",
-    "short_name": "shift_mate",
-    "start_url": ".",
+    "name": "ShiftMate - Smart Shift Management",
+    "short_name": "ShiftMate",
+    "start_url": "/",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "background_color": "#F4F3FF",
+    "theme_color": "#534AB7",
+    "description": "Employee Shift Scheduling & Management App",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

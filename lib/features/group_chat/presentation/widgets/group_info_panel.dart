@@ -21,6 +21,13 @@ class _GroupInfoPanelState extends ConsumerState<GroupInfoPanel> {
   late TextEditingController _descController;
   bool _isEditing = false;
 
+  String get _currentUserId {
+    final auth = ref.read(authProvider);
+    return auth.user?.id ?? 'emp1';
+  }
+
+  bool get _isAdmin => widget.group.isAdmin(_currentUserId);
+
   @override
   void initState() {
     super.initState();
@@ -35,18 +42,11 @@ class _GroupInfoPanelState extends ConsumerState<GroupInfoPanel> {
     super.dispose();
   }
 
-  String get _currentUserId => ref.read(chatProvider.select((s) {
-    final auth = ref.read(authProvider);
-    return auth.user?.id ?? 'emp1';
-  }));
-
-  bool get _isAdmin => widget.group.isAdmin(_currentUserId);
-
   @override
   Widget build(BuildContext context) {
-    final group = ref.watch(chatProvider.select((s) => 
-      s.groups.firstWhere((g) => g.id == widget.group.id, orElse: () => widget.group)
-    ));
+    final group = ref.watch(chatProvider.select((s) =>
+        s.groups.firstWhere((g) => g.id == widget.group.id,
+            orElse: () => widget.group)));
 
     return Container(
       width: MediaQuery.of(context).size.width * 0.85,
@@ -90,15 +90,12 @@ class _GroupInfoPanelState extends ConsumerState<GroupInfoPanel> {
         children: [
           const Text(
             'Group Info',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-            ),
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
           const Spacer(),
           IconButton(
             icon: const Icon(Icons.close),
-            onPressed: () => Navigator.of(context).pop(),
+            onPressed: () => Navigator.pop(context),
           ),
         ],
       ),
@@ -106,95 +103,52 @@ class _GroupInfoPanelState extends ConsumerState<GroupInfoPanel> {
   }
 
   Widget _buildGroupInfoSection(GroupChat group) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Row(
-              children: [
-                _buildGroupAvatar(group),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      if (_isEditing)
-                        TextField(
-                          controller: _nameController,
-                          decoration: const InputDecoration(
-                            isDense: true,
-                            border: InputBorder.none,
-                            contentPadding: EdgeInsets.zero,
-                          ),
-                          style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        )
-                      else
-                        Text(
-                          group.name,
-                          style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      const SizedBox(height: 4),
-                      Text(
-                        '${group.memberCount} members • ${group.onlineMemberCount} online',
-                        style: const TextStyle(
-                          fontSize: 13,
-                          color: AppTheme.textSecondary,
-                        ),
-                      ),
-                    ],
+            _buildGroupAvatar(group),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    group.name,
+                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                   ),
-                ),
-                if (_isAdmin)
-                  IconButton(
-                    icon: Icon(_isEditing ? Icons.check : Icons.edit, size: 20),
-                    onPressed: _isEditing ? _saveGroupInfo : _startEditing,
+                  const SizedBox(height: 4),
+                  Text(
+                    '${group.memberCount} members • ${group.onlineMemberCount} online',
+                    style: const TextStyle(fontSize: 11, color: AppTheme.textSecondary),
                   ),
-              ],
+                ],
+              ),
             ),
-            if (_isEditing)
-              Padding(
-                padding: const EdgeInsets.only(top: 8),
-                child: TextField(
-                  controller: _descController,
-                  maxLines: 2,
-                  decoration: const InputDecoration(
-                    hintText: 'Add a description...',
-                    isDense: true,
-                    border: OutlineInputBorder(),
-                    contentPadding: EdgeInsets.all(8),
-                  ),
-                  style: const TextStyle(fontSize: 14),
-                ),
-              )
-            else if (group.description != null && group.description!.isNotEmpty)
-              Padding(
-                padding: const EdgeInsets.only(top: 8),
-                child: Text(
-                  group.description!,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    color: AppTheme.textSecondary,
-                  ),
-                ),
+            if (_isAdmin && !_isEditing)
+              IconButton(
+                icon: const Icon(Icons.edit, size: 20),
+                onPressed: () => setState(() => _isEditing = true),
               ),
           ],
         ),
-      ),
+        if (group.description != null) ...[
+          const SizedBox(height: 12),
+          Text(
+            group.description!,
+            style: const TextStyle(fontSize: 13, color: AppTheme.textSecondary),
+          ),
+        ],
+      ],
     );
   }
 
   Widget _buildGroupAvatar(GroupChat group) {
     return Container(
-      width: 56,
-      height: 56,
+      width: 48,
+      height: 48,
       decoration: BoxDecoration(
         color: group.iconType == GroupIconType.color
             ? Color(int.parse(group.iconColor!.replaceAll('#', '0xFF')))
@@ -203,30 +157,10 @@ class _GroupInfoPanelState extends ConsumerState<GroupInfoPanel> {
       ),
       child: Center(
         child: group.iconType == GroupIconType.emoji && group.iconEmoji != null
-            ? Text(
-                group.iconEmoji!,
-                style: const TextStyle(fontSize: 28),
-              )
-            : const Icon(
-                Icons.chat_bubble,
-                color: AppTheme.primaryColor,
-                size: 28,
-              ),
+            ? Text(group.iconEmoji!, style: const TextStyle(fontSize: 28))
+            : const Icon(Icons.chat_bubble, color: AppTheme.primaryColor, size: 28),
       ),
     );
-  }
-
-  void _startEditing() => setState(() => _isEditing = true);
-
-  void _saveGroupInfo() {
-    if (_nameController.text.trim().isNotEmpty) {
-      ref.read(chatProvider.notifier).updateGroupInfo(
-        widget.group.id,
-        name: _nameController.text.trim(),
-        description: _descController.text.trim().isEmpty ? null : _descController.text.trim(),
-      );
-    }
-    setState(() => _isEditing = false);
   }
 
   Widget _buildMembersSection(GroupChat group) {
@@ -238,10 +172,7 @@ class _GroupInfoPanelState extends ConsumerState<GroupInfoPanel> {
           children: [
             const Text(
               'Members',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-              ),
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
             ),
             TextButton.icon(
               onPressed: () => _showAddMembersDialog(group),
@@ -262,6 +193,7 @@ class _GroupInfoPanelState extends ConsumerState<GroupInfoPanel> {
   Widget _buildMemberTile(GroupChat group, GroupMember member) {
     final isCurrentUser = member.id == _currentUserId;
     final isAi = member.id == 'ai_assistant';
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
@@ -277,7 +209,7 @@ class _GroupInfoPanelState extends ConsumerState<GroupInfoPanel> {
                 ),
                 child: Center(
                   child: isAi
-                      ? const Text('\u{1F916}', style: TextStyle(fontSize: 20))
+                      ? const Text('🤖', style: TextStyle(fontSize: 20))
                       : Text(
                           member.initials,
                           style: const TextStyle(
@@ -313,10 +245,7 @@ class _GroupInfoPanelState extends ConsumerState<GroupInfoPanel> {
                   children: [
                     Text(
                       '${member.name}${isCurrentUser ? ' (You)' : ''}',
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w500,
-                        fontSize: 14,
-                      ),
+                      style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 14),
                     ),
                     if (isAi) ...[
                       const SizedBox(width: 6),
@@ -341,10 +270,7 @@ class _GroupInfoPanelState extends ConsumerState<GroupInfoPanel> {
                 if (member.jobTitle != null)
                   Text(
                     member.jobTitle!,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: AppTheme.textSecondary,
-                    ),
+                    style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary),
                   ),
               ],
             ),
@@ -377,12 +303,19 @@ class _GroupInfoPanelState extends ConsumerState<GroupInfoPanel> {
                   const PopupMenuItem(value: 'promote', child: Text('Promote to Admin')),
                 if (member.role == MemberRole.admin)
                   const PopupMenuItem(value: 'demote', child: Text('Demote to Member')),
-                const PopupMenuItem(value: 'remove', child: Text('Remove', style: TextStyle(color: AppTheme.errorColor))),
+                const PopupMenuItem(
+                    value: 'remove', child: Text('Remove', style: TextStyle(color: AppTheme.errorColor))),
               ],
             ),
         ],
       ),
     );
+  }
+
+  Color _getColorForMember(GroupMember member) {
+    final colors = [AppTheme.primaryColor, AppTheme.accentColor, AppTheme.warningColor, AppTheme.errorColor];
+    final hash = member.name.hashCode.abs();
+    return colors[hash % colors.length];
   }
 
   Widget _buildAdminActions(GroupChat group) {
@@ -391,10 +324,7 @@ class _GroupInfoPanelState extends ConsumerState<GroupInfoPanel> {
       children: [
         const Text(
           'Admin Actions',
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-          ),
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
         ),
         const SizedBox(height: 8),
         ListTile(
@@ -412,10 +342,7 @@ class _GroupInfoPanelState extends ConsumerState<GroupInfoPanel> {
       children: [
         const Text(
           'Actions',
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-          ),
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
         ),
         const SizedBox(height: 8),
         ListTile(
@@ -497,7 +424,7 @@ class _GroupInfoPanelState extends ConsumerState<GroupInfoPanel> {
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('Leave Group'),
-        content: Text('Are you sure you want to leave "${group.name}"?'),
+        content: Text('Are you sure you want to leave ${group.name}?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
@@ -505,9 +432,9 @@ class _GroupInfoPanelState extends ConsumerState<GroupInfoPanel> {
           ),
           TextButton(
             onPressed: () {
-              ref.read(chatProvider.notifier).leaveGroup(group.id);
+              ref.read(chatProvider.notifier).leaveGroup(group.id, _currentUserId);
               Navigator.pop(ctx);
-              Navigator.pop(context);
+              Navigator.of(context).pop();
             },
             style: TextButton.styleFrom(foregroundColor: AppTheme.warningColor),
             child: const Text('Leave'),
@@ -522,7 +449,7 @@ class _GroupInfoPanelState extends ConsumerState<GroupInfoPanel> {
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('Delete Group'),
-        content: Text('Are you sure you want to delete "${group.name}"? This cannot be undone.'),
+        content: const Text('Are you sure you want to delete this group? This action cannot be undone.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
@@ -532,7 +459,7 @@ class _GroupInfoPanelState extends ConsumerState<GroupInfoPanel> {
             onPressed: () {
               ref.read(chatProvider.notifier).deleteGroup(group.id);
               Navigator.pop(ctx);
-              Navigator.pop(context);
+              Navigator.of(context).pop();
             },
             style: TextButton.styleFrom(foregroundColor: AppTheme.errorColor),
             child: const Text('Delete'),
@@ -543,32 +470,44 @@ class _GroupInfoPanelState extends ConsumerState<GroupInfoPanel> {
   }
 
   void _showIconPicker(GroupChat group) {
-    final emojis = ['\u{1F465}', '\u2699\uFE0F', '\u{1F4BC}', '\u{1F3E2}', '\u{1F3AF}', '\u{1F680}', '\u{1F4A1}', '\u{1F525}', '\u2B50', '\u{1F389}'];
+    final emojis = [
+      '\u{1F465}', '\u{1F4BC}', '\u{1F3E2}', '\u{1F3AF}',
+      '\u{1F680}', '\u{1F4A1}', '\u{1F525}', '\u{1F393}',
+      '\u{1F48E}', '\u{1F527}', '\u{1F3E0}', '\u{2764}\uFE0F',
+    ];
+
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Choose Group Icon'),
-        content: Wrap(
-          spacing: 8,
-          runSpacing: 8,
+        title: const Text('Change Group Icon'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            ...emojis.map((emoji) => GestureDetector(
-              onTap: () {
-                ref.read(chatProvider.notifier).updateGroupInfo(group.id, emoji: emoji);
-                Navigator.pop(ctx);
-              },
-              child: Container(
-                width: 50,
-                height: 50,
-                decoration: BoxDecoration(
-                  color: AppTheme.backgroundColor,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Center(
-                  child: Text(emoji, style: const TextStyle(fontSize: 24)),
-                ),
-              ),
-            )),
+            const Text('Emoji Icons:'),
+            const SizedBox(height: 12),
+            Wrap(
+              spacing: 8,
+              children: emojis
+                  .map((e) => GestureDetector(
+                        onTap: () {
+                          ref.read(chatProvider.notifier).updateGroupInfo(
+                                group.id,
+                                iconType: GroupIconType.emoji,
+                                iconEmoji: e,
+                              );
+                          Navigator.pop(ctx);
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: AppTheme.backgroundColor,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(e, style: const TextStyle(fontSize: 24)),
+                        ),
+                      ))
+                  .toList(),
+            ),
           ],
         ),
         actions: [
@@ -579,17 +518,5 @@ class _GroupInfoPanelState extends ConsumerState<GroupInfoPanel> {
         ],
       ),
     );
-  }
-
-  Color _getColorForMember(GroupMember member) {
-    final colors = [
-      AppTheme.primaryColor,
-      AppTheme.secondaryColor,
-      AppTheme.accentColor,
-      const Color(0xFFEC4899),
-      const Color(0xFF14B8A6),
-      const Color(0xFFF97316),
-    ];
-    return colors[member.id.hashCode.abs() % colors.length];
   }
 }

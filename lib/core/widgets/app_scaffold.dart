@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import '../../core/theme/app_theme.dart';
+import 'shift_mate_logo.dart';
 
 class AppScaffold extends StatelessWidget {
-  final String title;
+  final String? title;
+  final Widget? titleWidget;
+  final bool showLogo;
   final Widget body;
   final List<Widget>? actions;
   final bool showBackButton;
@@ -11,7 +14,9 @@ class AppScaffold extends StatelessWidget {
 
   const AppScaffold({
     super.key,
-    required this.title,
+    this.title,
+    this.titleWidget,
+    this.showLogo = false,
     required this.body,
     this.actions,
     this.showBackButton = true,
@@ -23,7 +28,9 @@ class AppScaffold extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(title),
+        title: showLogo
+            ? const ShiftMateLogo(size: 120, showSubtitle: false)
+            : titleWidget ?? (title != null ? Text(title!) : null),
         backgroundColor: AppTheme.surfaceColor,
         elevation: 0,
         scrolledUnderElevation: 1,
